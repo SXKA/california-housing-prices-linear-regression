@@ -23,12 +23,12 @@ def main():
     # Select features and split them into training features and test features with standardizing.
     x = housing.drop(columns="median_house_value")
     x["total_bedrooms_over_total_rooms"] = x["total_bedrooms"] / x["total_rooms"]
-    x["population_over_households"] = x["households"] / x["population"]
+    x["population_over_households"] = x["population"] / x["households"]
     x = x.drop(columns=["total_rooms", "population", "total_bedrooms", "households"])
     x_train = x.iloc[:split_point]
     x_test = x.iloc[split_point:]
-    x_train_log = x_train.applymap(lambda value: -log2(abs(value)) if value < 0 else log2(value))
-    x_test_log = x_test.applymap(lambda value: -log2(abs(value)) if value < 0 else log2(value))
+    x_train_log = x_train.map(lambda value: -log2(abs(value)) if value < 0 else log2(value))
+    x_test_log = x_test.map(lambda value: -log2(abs(value)) if value < 0 else log2(value))
     x_train_mean = x_train.mean()
     x_train_log_mean = x_train_log.mean()
     x_train_std = x_train.std()
@@ -142,8 +142,8 @@ def mean_squared_error(features, targets, weights):
     :param weights: The coefficient of features.
     :return: Mean squared error.
     """
-    return sum(label - sum(x * weight for x, weight in zip(feature, weights)) for feature, label in
-               zip(features, targets)) ** 2 / len(targets)
+    return sum((label - sum(x * weight for x, weight in zip(feature, weights))) ** 2 for feature, label in
+               zip(features, targets)) / len(targets)
 
 
 def r2_scores(y_pred, y_true, p):
@@ -160,7 +160,7 @@ def r2_scores(y_pred, y_true, p):
     r2 = 1 - sse / sst
     n = len(y_true)
 
-    return 1 - (1 - r2 ** 2) * (n - 1) / (n - p), r2
+    return 1 - (1 - r2) * (n - 1) / (n - p - 1), r2
 
 
 def line_plot(position, loss, dataset_scale=None):
@@ -212,7 +212,10 @@ def resid_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     plt.title(
         "Residual Plot for {} Dataset".format(dataset) + (" (dataset scale: log)" if dataset_scale == "log" else ""))
 
-    sns.residplot(x=y_true, y=y_pred)
+    residual = [true - pred for pred, true in zip(y_pred, y_true)]
+
+    sns.scatterplot(x=y_pred, y=residual)
+    plt.axhline(0, color="r", linestyle="--")
 
 
 def hist_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
