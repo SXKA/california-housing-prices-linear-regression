@@ -3,7 +3,6 @@ from statistics import mean, stdev
 import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
-
 from pandas import read_csv
 from scipy.stats import norm
 
@@ -160,7 +159,7 @@ def r2_scores(y_pred, y_true, p):
     :return: (Adjusted R2 score, R2 score) pair.
     """
     y_true_mean = mean(y_true)
-    sse = sum((pred - true) ** 2 for pred, true in zip(y_pred, y_true))
+    sse = sum((pred - true) ** 2 for pred, true in zip(y_pred, y_true, strict=False))
     sst = sum((true - y_true_mean) ** 2 for true in y_true)
     r2 = 1 - sse / sst
     n = len(y_true)
@@ -217,7 +216,7 @@ def resid_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     plt.title(
         "Residual Plot for {} Dataset".format(dataset) + (" (dataset scale: log)" if dataset_scale == "log" else ""))
 
-    residual = [true - pred for pred, true in zip(y_pred, y_true)]
+    residual = [true - pred for pred, true in zip(y_pred, y_true, strict=False)]
 
     sns.scatterplot(x=y_pred, y=residual)
     plt.axhline(0, color="r", linestyle="--")

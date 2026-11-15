@@ -36,7 +36,7 @@ class GD:
         """
         self.loss.append(loss(var_list))
 
-        return list(zip(gradients(loss, var_list), var_list))
+        return list(zip(gradients(loss, var_list), var_list, strict=False))
 
     def apply_gradients(self, grads_and_vars):
         """
