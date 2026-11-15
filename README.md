@@ -6,3 +6,12 @@ Gradient descent linear regression for https://www.kaggle.com/datasets/camnugent
 ![image](https://github.com/SXKA/california-housing-prices-linear-regression/blob/master/png/residual_plot.png)
 ## Residual Hist
 ![image](https://github.com/SXKA/california-housing-prices-linear-regression/blob/master/png/residual_hist.png)
+## Usage
+Install the dependencies with [uv](https://docs.astral.sh/uv/):
+```bash
+uv sync
+```
+Put `housing.csv` (the Kaggle California housing dataset) in the repository root, then run:
+```bash
+uv run python main.py
+```
