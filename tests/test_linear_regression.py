@@ -57,7 +57,9 @@ def test_r2_scores_match_sklearn_and_adjusted_formula():
 def test_gradients_match_finite_difference():
     x, y, _ = make_dataset(n=50)
     w = [0.1, 0.2, 0.3]
-    loss = lambda weights: mean_squared_error(x, y, weights)
+
+    def loss(weights):
+        return mean_squared_error(x, y, weights)
 
     from functools import partial
 

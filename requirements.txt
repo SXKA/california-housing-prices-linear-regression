@@ -1,5 +1,0 @@
-matplotlib
-seaborn
-pandas>=2.1
-scipy
-numpy
