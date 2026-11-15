@@ -1,7 +1,7 @@
-from math import log2
 from statistics import mean, stdev
 
 import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
 
 from pandas import read_csv
@@ -16,6 +16,9 @@ def main():
     housing = read_csv("housing.csv")
     housing = housing.drop(columns="ocean_proximity")
     housing = housing.dropna()
+    # Shuffle before the 80/20 split: the rows are not in random order, so the
+    # tail of the file is not a representative test set.
+    housing = housing.sample(frac=1, random_state=42).reset_index(drop=True)
 
     # Calculate the split point between training dataset and test dataset.
     split_point = int(len(housing) * 0.8)
@@ -27,8 +30,9 @@ def main():
     x = x.drop(columns=["total_rooms", "population", "total_bedrooms", "households"])
     x_train = x.iloc[:split_point]
     x_test = x.iloc[split_point:]
-    x_train_log = x_train.map(lambda value: -log2(abs(value)) if value < 0 else log2(value))
-    x_test_log = x_test.map(lambda value: -log2(abs(value)) if value < 0 else log2(value))
+    # Signed log2, vectorized instead of a Python call per cell.
+    x_train_log = np.sign(x_train) * np.log2(np.abs(x_train))
+    x_test_log = np.sign(x_test) * np.log2(np.abs(x_test))
     x_train_mean = x_train.mean()
     x_train_log_mean = x_train_log.mean()
     x_train_std = x_train.std()
@@ -52,8 +56,8 @@ def main():
     y_test = y.iloc[split_point:]
     y_train_raw = y_train.values
     y_test_raw = y_test.values
-    y_train_log = y_train.map(log2).values
-    y_test_log = y_test.map(log2).values
+    y_train_log = np.log2(y_train.values)
+    y_test_log = np.log2(y_test.values)
 
     # Initialize LinearRegression class.
     para_num = len(x.columns)
@@ -73,8 +77,8 @@ def main():
     y_test_pred_raw = linear_regression_raw.predict(x_test_raw)
     y_train_pred_log = linear_regression_log.predict(x_train_log)
     y_test_pred_log = linear_regression_log.predict(x_test_log)
-    y_train_pred_log = [2 ** value for value in y_train_pred_log]
-    y_test_pred_log = [2 ** value for value in y_test_pred_log]
+    y_train_pred_log = list(np.exp2(y_train_pred_log))
+    y_test_pred_log = list(np.exp2(y_test_pred_log))
 
     # Print the loss of test dataset.
     print("Test dataset loss: {}".format(test_loss_raw))
@@ -142,8 +146,9 @@ def mean_squared_error(features, targets, weights):
     :param weights: The coefficient of features.
     :return: Mean squared error.
     """
-    return sum((label - sum(x * weight for x, weight in zip(feature, weights))) ** 2 for feature, label in
-               zip(features, targets)) / len(targets)
+    residuals = np.asarray(targets, dtype=float) - np.asarray(features, dtype=float) @ np.asarray(weights, dtype=float)
+
+    return float(np.mean(residuals ** 2))
 
 
 def r2_scores(y_pred, y_true, p):
@@ -237,7 +242,9 @@ def hist_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     plt.title("Residual Histogram for {} Dataset".format(dataset) + (
         " (dataset scale: log)" if dataset_scale == "log" else ""))
 
-    x = range(int(min(residual)), int(max(residual)))
+    # 500 evaluation points instead of one per integer across the residual range,
+    # which is hundreds of thousands of points for house prices.
+    x = np.linspace(min(residual), max(residual), 500)
     y = norm.pdf(x, residual_mean, residual_std)
 
     sns.histplot(residual, stat="density")

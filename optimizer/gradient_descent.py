@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class GD:
     """
     Optimizer that implements the Gradient descent algorithm.
@@ -52,6 +55,11 @@ def gradients(ys, xs):
     :return: Gradients.
     """
     features, targets = ys.args
+    features = np.asarray(features, dtype=float)
+    targets = np.asarray(targets, dtype=float)
 
-    return [sum((label - sum(x * weight for x, weight in zip(feature, xs))) * -feature[i] for feature, label in
-                zip(features, targets)) * 2 / len(targets) for i in range(len(xs))]
+    # Vectorized MSE gradient: -2/n * X^T (y - Xw). The previous triple Python
+    # loop made every epoch O(n * d) interpreted operations.
+    residuals = targets - features @ np.asarray(xs, dtype=float)
+
+    return list(-2 * features.T @ residuals / len(targets))

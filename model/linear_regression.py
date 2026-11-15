@@ -1,6 +1,8 @@
 from functools import partial
 from random import gauss
 
+import numpy as np
+
 from optimizer.gradient_descent import GD
 
 
@@ -69,4 +71,4 @@ class LinearRegression:
         :param x: Input samples.
         :return: Prediction.
         """
-        return [sum(attr * weight for attr, weight in zip(attrs, self._weights)) for attrs in x]
+        return list(np.asarray(x, dtype=float) @ np.asarray(self._weights, dtype=float))
