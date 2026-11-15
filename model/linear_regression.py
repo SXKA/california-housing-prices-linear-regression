@@ -50,8 +50,9 @@ class LinearRegression:
             print("Epoch {} loss: {}".format(epoch, self._optimizer.loss[-1]))
 
             # Relative tolerance: an absolute 1e-16 threshold is below float resolution for large losses.
-            if len(self._optimizer.loss) >= 2 and abs(
-                    self._optimizer.loss[-1] - self._optimizer.loss[-2]) <= tol * max(1.0, self._optimizer.loss[-2]):
+            if len(self._optimizer.loss) >= 2 and abs(self._optimizer.loss[-1] - self._optimizer.loss[-2]) <= tol * max(
+                1.0, self._optimizer.loss[-2]
+            ):
                 break
 
         return self._optimizer.loss

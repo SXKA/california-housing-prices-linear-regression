@@ -84,14 +84,24 @@ def main():
     print("Test dataset loss (dataset scale: log): {}".format(test_loss_log))
 
     # Print the R2 score
-    print("Adjusted R2 score and R2 score for training dataset: {}".format(
-        r2_scores(y_train_pred_raw, y_train_raw, para_num)))
     print(
-        "Adjusted R2 score and R2 score for test dataset: {}".format(r2_scores(y_test_pred_raw, y_test_raw, para_num)))
-    print("Adjusted R2 score and R2 score for training dataset (dataset scale: log): {}".format(
-        r2_scores(y_train_pred_log, y_train_raw, para_num)))
-    print("Adjusted R2 score and R2 score for test dataset (dataset scale: log): {}".format(
-        r2_scores(y_test_pred_log, y_test_raw, para_num)))
+        "Adjusted R2 score and R2 score for training dataset: {}".format(
+            r2_scores(y_train_pred_raw, y_train_raw, para_num)
+        )
+    )
+    print(
+        "Adjusted R2 score and R2 score for test dataset: {}".format(r2_scores(y_test_pred_raw, y_test_raw, para_num))
+    )
+    print(
+        "Adjusted R2 score and R2 score for training dataset (dataset scale: log): {}".format(
+            r2_scores(y_train_pred_log, y_train_raw, para_num)
+        )
+    )
+    print(
+        "Adjusted R2 score and R2 score for test dataset (dataset scale: log): {}".format(
+            r2_scores(y_test_pred_log, y_test_raw, para_num)
+        )
+    )
 
     # Plot loss changes line.
     plt.rc("font", size=20)
@@ -147,7 +157,7 @@ def mean_squared_error(features, targets, weights):
     """
     residuals = np.asarray(targets, dtype=float) - np.asarray(features, dtype=float) @ np.asarray(weights, dtype=float)
 
-    return float(np.mean(residuals ** 2))
+    return float(np.mean(residuals**2))
 
 
 def r2_scores(y_pred, y_true, p):
@@ -195,8 +205,10 @@ def scatter_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     plt.subplot(position)
     plt.xlabel("Target")
     plt.ylabel("Prediction")
-    plt.title("Analyzing {} Dataset Prediction Discrepancies".format(dataset) + (
-        " (dataset scale: log)" if dataset_scale == "log" else ""))
+    plt.title(
+        "Analyzing {} Dataset Prediction Discrepancies".format(dataset)
+        + (" (dataset scale: log)" if dataset_scale == "log" else "")
+    )
 
     sns.scatterplot(x=y_true, y=y_pred)
 
@@ -214,7 +226,8 @@ def resid_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     plt.xlabel("Prediction")
     plt.ylabel("Residual")
     plt.title(
-        "Residual Plot for {} Dataset".format(dataset) + (" (dataset scale: log)" if dataset_scale == "log" else ""))
+        "Residual Plot for {} Dataset".format(dataset) + (" (dataset scale: log)" if dataset_scale == "log" else "")
+    )
 
     residual = [true - pred for pred, true in zip(y_pred, y_true, strict=False)]
 
@@ -238,8 +251,10 @@ def hist_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     plt.subplot(position)
     plt.xlabel("Residual")
     plt.ylabel("Density")
-    plt.title("Residual Histogram for {} Dataset".format(dataset) + (
-        " (dataset scale: log)" if dataset_scale == "log" else ""))
+    plt.title(
+        "Residual Histogram for {} Dataset".format(dataset)
+        + (" (dataset scale: log)" if dataset_scale == "log" else "")
+    )
 
     # 500 evaluation points instead of one per integer across the residual range,
     # which is hundreds of thousands of points for house prices.
@@ -247,8 +262,8 @@ def hist_plot(position, y_pred, y_true, dataset=None, dataset_scale=None):
     y = norm.pdf(x, residual_mean, residual_std)
 
     sns.histplot(residual, stat="density")
-    sns.kdeplot(residual, color='r', label="Kernel distribution")
-    sns.lineplot(x=x, y=y, color='g', label="Normal distribution")
+    sns.kdeplot(residual, color="r", label="Kernel distribution")
+    sns.lineplot(x=x, y=y, color="g", label="Normal distribution")
 
 
 if __name__ == "__main__":
